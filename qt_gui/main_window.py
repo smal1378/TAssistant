@@ -103,7 +103,9 @@ class MainWindow(QMainWindow):
             self.core.export_scan(scan.name, file, lambda: print("Exported"))
 
     def _ac_list_student_scan(self, scan: Scanner):
-        StudentsList(self, scan.get_student_manager()).show()
+        stu = StudentsList(self, scan.get_student_manager())
+        stu.on_need_to_save.connect(self.set_need_to_save)
+        stu.show()
 
     def _ac_import_student_scan(self, scan: Scanner):
         dia = QFileDialog(self, "Choose Scan File")
@@ -172,6 +174,7 @@ class MainWindow(QMainWindow):
 
     def _ac_manager_list_stu(self, manager: StudentManager):
         stu = StudentsList(self, manager)
+        stu.on_need_to_save.connect(self.set_need_to_save)
         stu.show()
 
     def _ac_manager_add_stu(self, manager: StudentManager):
@@ -180,8 +183,7 @@ class MainWindow(QMainWindow):
         stu.entered.connect(lambda x, y, z: self._ac_manager_add_stu_helper(x, y, z,
                                                                             stu, manager))
 
-    @staticmethod
-    def _ac_manager_add_stu_helper(x, y, z, s, m):
+    def _ac_manager_add_stu_helper(self, x, y, z, s, m):
         if not (x and y):
             s.show_error("Both Fields Should Be Filled!")
         elif not y.isnumeric():
@@ -190,12 +192,14 @@ class MainWindow(QMainWindow):
             s.show_error("Your Id Should Be 9 Characters!")
         else:
             s.close()
+            self.need_to_save = True
             m.add_student(x, int(y), z)
 
     def _ac_new_manager(self):
         name = LineGet(None, "Manager Name", self._validator_manager).get()
         if name:
             self.core.add_manager(name)
+            self.need_to_save = True
             self._reload_manager_menu()
 
     def _validator_manager(self, name: str):
@@ -297,9 +301,9 @@ class MainWindow(QMainWindow):
         About(self, self.core.get_about()).show()
 
     def _ac_weekly(self):
-        # self.need_to_save = True
-        # StudentView will change this attribute now. :)
-        StudentView(self, self.core.get_student(), edit=True).show()
+        stu = StudentView(self, self.core.get_student(), edit=True)
+        stu.on_need_to_save.connect(self.set_need_to_save)
+        stu.show()
 
     def _ac_weekly_export(self):
         dia = QFileDialog(self, "Save Export Weekly Schedule Report..")
@@ -326,6 +330,9 @@ class MainWindow(QMainWindow):
             else:
                 self.core.set_student(new_name, int(new_id), github)
             self._reload_self_menu()
+
+    def set_need_to_save(self):
+        self.need_to_save = True
 
     def reload(self):
         self._reload_self_menu()

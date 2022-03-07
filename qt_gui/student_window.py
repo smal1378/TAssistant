@@ -1,11 +1,14 @@
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import QWidget, QDialog, QLabel, QVBoxLayout, QGridLayout, QSizePolicy, QComboBox, QHBoxLayout, \
-    QFrame
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtWidgets import QWidget, QDialog, QLabel, QVBoxLayout, \
+    QGridLayout, QSizePolicy, QComboBox, QHBoxLayout
 
 from model import Student, DayStructure
 
 
 class Cell(QWidget):
+    on_need_to_save = pyqtSignal()
+
     class _StateTraverser:
         def __init__(self, time_states, initial=None):
             self.states = list(time_states.keys())
@@ -49,7 +52,8 @@ class Cell(QWidget):
     def change_state(self):
         if not self.edit:
             return
-        self.parent().parent().need_to_save = True
+        # noinspection PyUnresolvedReferences
+        self.on_need_to_save.emit()
         self.state = self.state_traverser.next()
         self.wid.setText(self.day.time_states[self.state][0])
         self.wid.setStyleSheet(f"background: {self.day.time_state_colors[self.state]};"
@@ -58,6 +62,8 @@ class Cell(QWidget):
 
 
 class StudentView(QDialog):
+    on_need_to_save = pyqtSignal()
+
     def __init__(self, parent, student: Student, edit: bool = False):
         super(StudentView, self).__init__(parent)
         self.student = student
@@ -92,7 +98,10 @@ class StudentView(QDialog):
         for day in student.week:
             counter2 = 1
             for _, _, state in day.get_times():
-                lay.addWidget(Cell(day, counter2-1, edit), counter2, counter1)
+                cell = Cell(day, counter2-1, edit)
+                # noinspection PyUnresolvedReferences
+                cell.on_need_to_save.connect(lambda: self.on_need_to_save.emit())
+                lay.addWidget(cell, counter2, counter1)
                 counter2 += 1
             counter1 += 1
 
@@ -103,6 +112,7 @@ class StudentView(QDialog):
             comb.addItem(student.importance_states[key][0], key)
             index += 1
         comb.setCurrentIndex(key_to_index[student.importance])
+        # noinspection PyUnresolvedReferences
         comb.currentIndexChanged.connect(lambda e: (student.set_importance(comb.itemData(e)),
-                                                    self.parent().__setattr__('need_to_save', True)))
+                                                    self.on_need_to_save.emit()))
 

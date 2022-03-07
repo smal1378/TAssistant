@@ -1,3 +1,4 @@
+from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QListView, QTreeView, QTreeWidget, QTreeWidgetItem
 
 from model import StudentManager
@@ -5,6 +6,8 @@ from qt_gui.student_window import StudentView
 
 
 class StudentsList(QDialog):
+    on_need_to_save = pyqtSignal()
+
     def __init__(self, parent, manager: StudentManager):
         super(StudentsList, self).__init__(parent)
         self.manager = manager
@@ -26,8 +29,10 @@ class StudentsList(QDialog):
             wid.addTopLevelItem(QTreeWidgetItem([student.name, str(student.id), student.github]))
         wid.itemDoubleClicked.connect(self.double_click)
 
-    def double_click(self, e):
-        e: QTreeWidgetItem
+    def double_click(self, e: QTreeWidgetItem):
         stu = self.manager.get_student(int(e.text(1)))
-        StudentView(self, stu, True).show()
+        view = StudentView(self, stu, True)
+        # noinspection PyUnresolvedReferences
+        view.on_need_to_save.connect(lambda: self.on_need_to_save.emit())
+        view.show()
 
