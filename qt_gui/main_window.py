@@ -115,12 +115,14 @@ class MainWindow(QMainWindow):
                                           'Scanner Export(*.taascan);;'
                                           'All Files(*.*)')[0]
         if file:
-            self.core.import_students(file, scan, lambda e: print("Imported") if e == 0
-                                      else ErrorMessage(self, f"Error, code: {e}"))
+            self.core.import_students(file, scan, (lambda e: self.set_need_to_save() if e == 0
+                                      else ErrorMessage(self, f"Error, code: {e}\n"
+                                                              f"Filename: {file}").show()))
 
     def _ac_del_scan(self, scan: Scanner):
         if AskYesNo(None, f"Are You Sure You Want To Delete {scan.name}?").is_yes():
             self.core.del_scan(scan.name)
+            self.set_need_to_save()
             self._reload_scan_menu()
 
     def _ac_new_scan(self):
@@ -129,6 +131,7 @@ class MainWindow(QMainWindow):
         name = line.get()
         if name:
             self.core.add_scan(name, include_self=line.get_checkbox('self'))
+            self.set_need_to_save()
             self._reload_scan_menu()
 
     def _reload_manager_menu(self):
@@ -152,6 +155,7 @@ class MainWindow(QMainWindow):
     def _ac_manager_del(self, manager: StudentManager):
         if AskYesNo(None, f"Are You Sure You Want To Delete {manager.name}?").is_yes():
             self.core.del_manager(manager.name)
+            self.set_need_to_save()
             self._reload_manager_menu()
 
     def _ac_manager_import(self, manager: StudentManager):
@@ -164,7 +168,7 @@ class MainWindow(QMainWindow):
         for file in files:
             self.core.import_students(file, manager,
                                       lambda code: ErrorMessage(self, "File Corrupt").show()
-                                      if code == 1 else print("Imported"))
+                                      if code == 1 else (print("Imported"), self.set_need_to_save()))
 
     def _ac_manager_export(self, manager: StudentManager):
         dia = QFileDialog(self, "Choose Export File:")
@@ -192,14 +196,14 @@ class MainWindow(QMainWindow):
             s.show_error("Your Id Should Be 9 Characters!")
         else:
             s.close()
-            self.need_to_save = True
+            self.set_need_to_save()
             m.add_student(x, int(y), z)
 
     def _ac_new_manager(self):
         name = LineGet(None, "Manager Name", self._validator_manager).get()
         if name:
             self.core.add_manager(name)
-            self.need_to_save = True
+            self.set_need_to_save()
             self._reload_manager_menu()
 
     def _validator_manager(self, name: str):
@@ -321,7 +325,7 @@ class MainWindow(QMainWindow):
             set_stu.show_error("Your Id Should Be 9 or 10 Characters!")
         else:
             set_stu.close()
-            self.need_to_save = True
+            self.set_need_to_save()
             stu = self.core.get_student()
             if stu:
                 stu.name = new_name
