@@ -1,5 +1,5 @@
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import QWidget, QDialog, QLabel, QVBoxLayout, QGridLayout, QSizePolicy
+from PyQt5.QtWidgets import QWidget, QDialog, QLabel, QVBoxLayout, QGridLayout, QSizePolicy, QComboBox
 
 from model import Student, DayStructure
 
@@ -70,6 +70,8 @@ class StudentView(QDialog):
         lay.setContentsMargins(15, 15, 15, 15)
         v_lay.addWidget(QLabel(f"{student.name} - {student.id} - {student.github}"), 0,
                         QtCore.Qt.AlignCenter)
+        comb = QComboBox()
+        v_lay.addWidget(comb)
         v_lay.addLayout(lay)
         self.setLayout(v_lay)
         counter = 1
@@ -90,5 +92,12 @@ class StudentView(QDialog):
                 counter2 += 1
             counter1 += 1
 
-
+        key_to_index = {}
+        index = 0
+        for key in student.importance_states:
+            key_to_index[key] = index
+            comb.addItem(student.importance_states[key][0], key)
+            index += 1
+        comb.setCurrentIndex(key_to_index[student.importance])
+        comb.currentIndexChanged.connect(lambda e: student.set_importance(comb.itemData(e)))
 
