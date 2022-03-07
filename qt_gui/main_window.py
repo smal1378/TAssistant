@@ -109,12 +109,12 @@ class MainWindow(QMainWindow):
 
     def _ac_import_student_scan(self, scan: Scanner):
         dia = QFileDialog(self, "Choose Scan File")
-        file = dia.getOpenFileName(filter='Project(*.taaproj);;'
-                                          'Weekly Export(*.taaexp);;'
-                                          'Manager Export(*.taaman);;'
-                                          'Scanner Export(*.taascan);;'
-                                          'All Files(*.*)')[0]
-        if file:
+        files = dia.getOpenFileNames(filter='Project(*.taaproj);;'
+                                            'Weekly Export(*.taaexp);;'
+                                            'Manager Export(*.taaman);;'
+                                            'Scanner Export(*.taascan);;'
+                                            'All Files(*.*)')[0]
+        for file in files:
             self.core.import_students(file, scan, (lambda e: self.set_need_to_save() if e == 0
                                       else ErrorMessage(self, f"Error, code: {e}\n"
                                                               f"Filename: {file}").show()))
