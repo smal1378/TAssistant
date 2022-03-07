@@ -103,5 +103,6 @@ class StudentView(QDialog):
             comb.addItem(student.importance_states[key][0], key)
             index += 1
         comb.setCurrentIndex(key_to_index[student.importance])
-        comb.currentIndexChanged.connect(lambda e: student.set_importance(comb.itemData(e)))
+        comb.currentIndexChanged.connect(lambda e: (student.set_importance(comb.itemData(e)),
+                                                    self.parent().__setattr__('need_to_save', True)))
 
