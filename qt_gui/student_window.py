@@ -1,5 +1,6 @@
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import QWidget, QDialog, QLabel, QVBoxLayout, QGridLayout, QSizePolicy, QComboBox
+from PyQt5.QtWidgets import QWidget, QDialog, QLabel, QVBoxLayout, QGridLayout, QSizePolicy, QComboBox, QHBoxLayout, \
+    QFrame
 
 from model import Student, DayStructure
 
@@ -70,8 +71,11 @@ class StudentView(QDialog):
         lay.setContentsMargins(15, 15, 15, 15)
         v_lay.addWidget(QLabel(f"{student.name} - {student.id} - {student.github}"), 0,
                         QtCore.Qt.AlignCenter)
+        importance_lay = QHBoxLayout()
         comb = QComboBox()
-        v_lay.addWidget(comb)
+        importance_lay.addWidget(QLabel("How Much Student Wants To Join The Meetings? "), 0)
+        importance_lay.addWidget(comb, 1)
+        v_lay.addLayout(importance_lay)
         v_lay.addLayout(lay)
         self.setLayout(v_lay)
         counter = 1
