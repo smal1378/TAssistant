@@ -186,7 +186,7 @@ class MainWindow(QMainWindow):
             s.show_error("Both Fields Should Be Filled!")
         elif not y.isnumeric():
             s.show_error("How Does Your Id Contain Letters?")
-        elif len(y) != 9:
+        elif not 9 <= len(y) <= 10:
             s.show_error("Your Id Should Be 9 Characters!")
         else:
             s.close()
@@ -313,8 +313,8 @@ class MainWindow(QMainWindow):
             set_stu.show_error("Both Fields Should Be Filled!")
         elif not new_id.isnumeric():
             set_stu.show_error("How Does Your Id Contain Letters?")
-        elif len(new_id) != 9:
-            set_stu.show_error("Your Id Should Be 9 Characters!")
+        elif not 9 <= len(new_id) <= 10:
+            set_stu.show_error("Your Id Should Be 9 or 10 Characters!")
         else:
             set_stu.close()
             self.need_to_save = True
