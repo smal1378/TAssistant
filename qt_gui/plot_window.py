@@ -2,30 +2,38 @@ from typing import Dict
 
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QDialog, QWidget, QHBoxLayout, QLabel, QLineEdit, QVBoxLayout, QGridLayout, QPushButton, \
-    QFileDialog
+    QFileDialog, QFrame
 
 from model import PlotResult, WeekStructure
 
 
-class Cell(QWidget):
+class Cell(QFrame):
     def __init__(self, day: int, index: int, plot: PlotResult):
         super(Cell, self).__init__()
         data = plot.get(day, index)
-        tool = f""
-        maxi = 0
-        value = 0
-        for key in data:
-            if data[key] >= value:
-                value = data[key]
-                maxi = key
-            tool += f"{plot.time_states[key][0]}: {data[key]}\n"
+        # tool = f""
+        # maxi = 0
+        # value = 0
+        # for key in data:
+        #     if data[key] >= value:
+        #         value = data[key]
+        #         maxi = key
+        #     tool += f"{plot.time_states[key][0]}: {data[key]}\n"
 
-        self.setStyleSheet(f"background-color: {'#afa' if plot.is_on(day, index) else '#faa'};"
+        self.setStyleSheet(f"background-color: {'#dfd' if plot.is_on(day, index) else '#fdd'};"
                            f"font-size: 12pt;")
-        lay = QVBoxLayout()
+        lay = QGridLayout()
+        lay.setContentsMargins(5, 5, 5, 5)
         self.setLayout(lay)
-        lay.addWidget(QLabel(f"{plot.time_states[maxi][0]}: {value}"))
-        self.setToolTip(tool)
+        col = row = 1
+        for key, count in data.items():
+            lab = QLabel(f"{plot.time_states[key][0]}: {count}")
+            lay.addWidget(lab, row, col)
+            col += 1
+            if col == 3:
+                col = 1
+                row += 1
+        # self.setToolTip(tool)
 
 
 class Plot(QDialog):
