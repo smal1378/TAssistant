@@ -1,5 +1,8 @@
+import os.path
+
 from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QListView, QTreeView, QTreeWidget, QTreeWidgetItem
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QListView, QTreeView, QTreeWidget, QTreeWidgetItem, QPushButton, \
+    QFileDialog
 
 from model import StudentManager
 from qt_gui.student_window import StudentView
@@ -28,6 +31,9 @@ class StudentsList(QDialog):
         for student in manager.get_students():
             wid.addTopLevelItem(QTreeWidgetItem([student.name, str(student.id), student.github]))
         wid.itemDoubleClicked.connect(self.double_click)
+        btn = QPushButton("Export Github Ids")
+        btn.clicked.connect(self.export_btn)
+        lay.addWidget(btn)
 
     def double_click(self, e: QTreeWidgetItem):
         stu = self.manager.get_student(int(e.text(1)))
@@ -36,3 +42,12 @@ class StudentsList(QDialog):
         view.on_need_to_save.connect(lambda: self.on_need_to_save.emit())
         view.show()
 
+    def export_btn(self):
+        dialog = QFileDialog(self, "Save Export File")
+        filename = dialog.getSaveFileName(filter="Text File(*.txt)")[0]
+        if filename:
+            with open(filename, "w") as file:
+                for student in self.manager.get_students():
+                    if student.github:
+                        file.write(student.github)
+                        file.write("\n")
